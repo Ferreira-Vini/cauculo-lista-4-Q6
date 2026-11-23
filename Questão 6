@@ -1,0 +1,65 @@
+# cauculo-lista-4-Q6
+
+import numpy as np
+
+r = 0.4
+K = 1000
+P0 = 100
+
+def f(t, P):
+    return r * P * (1 - P/K)
+
+def euler(h):
+    t = np.arange(0, 20 + h/2, h)
+    P = [P0]
+
+    for i in range(len(t)-1):
+        passo = t[i+1] - t[i]
+        P.append(P[-1] + passo*f(t[i], P[-1]))
+
+    return t, np.array(P)
+
+def heun(h):
+    t = np.arange(0, 20 + h/2, h)
+    P = [P0]
+
+    for i in range(len(t)-1):
+        passo = t[i+1] - t[i]
+        k1 = f(t[i], P[-1])
+        k2 = f(t[i]+passo, P[-1]+passo*k1)
+        P.append(P[-1] + passo*(k1+k2)/2)
+
+    return t, np.array(P)
+
+def rk4(h):
+    t = np.arange(0, 20 + h/2, h)
+    P = [P0]
+
+    for i in range(len(t)-1):
+        passo = t[i+1] - t[i]
+        atual = P[-1]
+
+        k1 = f(t[i], atual)
+        k2 = f(t[i]+passo/2, atual+passo*k1/2)
+        k3 = f(t[i]+passo/2, atual+passo*k2/2)
+        k4 = f(t[i]+passo, atual+passo*k3)
+
+        P.append(atual + passo*(k1+2*k2+2*k3+k4)/6)
+
+    return t, np.array(P)
+
+# Comparação dos métodos
+for h in [1, 0.5, 0.25]:
+    for nome, metodo in [
+        ("Euler", euler),
+        ("Heun", heun),
+        ("RK4", rk4)
+    ]:
+        t, P = metodo(h)
+        print(nome, "h =", h, "P(20) =", P[-1])
+
+# Solução analítica
+def exata(t):
+    return K/(1+9*np.exp(-r*t))
+
+print("Solução exata:", exata(20))
